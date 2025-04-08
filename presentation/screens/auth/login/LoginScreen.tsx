@@ -6,12 +6,14 @@ import { RootStackParamList } from '../../../navigator/MainStackNavigator';
 import styles from './Styles'
 import { Formik } from 'formik';
 import { ApiRequestHandler } from '../../../../data/sources/remote/api/ApiRequestHandler';
+import { AuthResponse } from '../../../../domain/models/AuthResponse';
+import { defaultErrorResponse, ErrorResponse } from '../../../../domain/models/ErrorResponse';
 
 
 interface Props extends StackScreenProps<RootStackParamList, 'LoginScreen'> { }
 
 const LoginScreen = ({ navigation, route }: Props) => {
-  
+
   let RegExpEmail = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/; //We use the RFC 5322 compliant regex to validate the email
   const validations = (values: {
     email: string;
@@ -37,6 +39,33 @@ const LoginScreen = ({ navigation, route }: Props) => {
     return errors
   }
 
+  const login = async (email:string, password:string): Promise<AuthResponse | ErrorResponse> => {
+    try {
+      //<AuthResponse> Especifica el tipo de respuesta (un objeto tipo AuthResponse)
+      const response = await ApiRequestHandler.post<AuthResponse>('/auth/login', {
+        email: email,
+        password: password
+      });
+      console.log("Response: ", response.data);
+      return response.data; //Resuelve la promesa con un AuthResponse
+    } catch (error: any) {
+      if(error.response) {
+        const errorData: ErrorResponse = error.response.data; //Se captura el objeto "error" recibido por el servidor
+        if(Array.isArray(errorData.message)){
+          console.error('Errores multiples del servidor:\n', errorData.message.join('\n'));  //Desplegamos mensajes
+        }
+        else{
+          console.error('Error unico del servidor:\n', errorData.message);  //Desplegamos mensajes
+        }
+        return errorData;
+      }
+      else{
+        console.error('Error en la peticion:\n', error.message);
+        return defaultErrorResponse;
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Image
@@ -58,16 +87,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
           }}
           validate={validations}
           onSubmit={async (values) => {
-            try {
-              const response = await ApiRequestHandler.post('/auth/login', {
-                email: values.email,
-                password: values.password
-              });
-
-              console.log('Response: ', response.data);
-            } catch (error) {
-              console.log('Error en la solicitud de login: ', error);
-            }
+            await login(values.email, values.password);
           }}
         >{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => <View>
           <DefaultTextInput
@@ -88,7 +108,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
             secureTextEntry={true}
             value={values.password}
           />
-          {errors.password && touched.email ? (<Text style={styles.errorText}>{errors.password}</Text>):null}
+          {errors.password && touched.email ? (<Text style={styles.errorText}>{errors.password}</Text>) : null}
 
           <DefaultRoundedButton
             text='INICIAR SESION'
