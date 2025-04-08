@@ -9,6 +9,7 @@ import { AuthService } from '../../../../data/sources/remote/services/AuthServic
 import { AuthRepositoryImpl } from '../../../../data/repository/AuthRepositoryImpl';
 import { LoginUseCase } from '../../../../domain/useCases/auth/LoginUseCase';
 import { LoginViewModel } from './LoginViewModel';
+import { container } from '../../../../di/container';
 
 
 
@@ -41,12 +42,8 @@ const LoginScreen = ({ navigation, route }: Props) => {
     return errors
   }
 
-  //Aplicando Clean Architecture + MVVM
-  //Primero se implementa la clase que no recibe ninguna otra clase
-  const authService = new AuthService();
-  const authRepository = new AuthRepositoryImpl(authService);
-  const loginUseCase = new LoginUseCase(authRepository);
-  const loginViewModel = new LoginViewModel(loginUseCase);
+  //Aplicando Clean Architecture + MVVM + Dependency Injection
+  const loginViewModel = container.resolve('loginViewModel');
 
 
   return (

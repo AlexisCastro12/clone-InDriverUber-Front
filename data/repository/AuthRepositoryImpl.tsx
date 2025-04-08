@@ -6,7 +6,7 @@ import { AuthService } from "../sources/remote/services/AuthService";
 export class AuthRepositoryImpl implements AuthRepository {
   private authService: AuthService;
 
-  constructor(authService: AuthService) {
+  constructor({authService}: {authService: AuthService}) {
     this.authService = authService;
   }
 
