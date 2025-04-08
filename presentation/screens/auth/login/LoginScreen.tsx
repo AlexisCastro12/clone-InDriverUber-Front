@@ -5,9 +5,11 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackParamList } from '../../../navigator/MainStackNavigator';
 import styles from './Styles'
 import { Formik } from 'formik';
-import { ApiRequestHandler } from '../../../../data/sources/remote/api/ApiRequestHandler';
-import { AuthResponse } from '../../../../domain/models/AuthResponse';
-import { defaultErrorResponse, ErrorResponse } from '../../../../domain/models/ErrorResponse';
+import { AuthService } from '../../../../data/sources/remote/services/AuthService';
+import { AuthRepositoryImpl } from '../../../../data/repository/AuthRepositoryImpl';
+import { LoginUseCase } from '../../../../domain/useCases/auth/LoginUseCase';
+import { LoginViewModel } from './LoginViewModel';
+
 
 
 interface Props extends StackScreenProps<RootStackParamList, 'LoginScreen'> { }
@@ -39,32 +41,13 @@ const LoginScreen = ({ navigation, route }: Props) => {
     return errors
   }
 
-  const login = async (email:string, password:string): Promise<AuthResponse | ErrorResponse> => {
-    try {
-      //<AuthResponse> Especifica el tipo de respuesta (un objeto tipo AuthResponse)
-      const response = await ApiRequestHandler.post<AuthResponse>('/auth/login', {
-        email: email,
-        password: password
-      });
-      console.log("Response: ", response.data);
-      return response.data; //Resuelve la promesa con un AuthResponse
-    } catch (error: any) {
-      if(error.response) {
-        const errorData: ErrorResponse = error.response.data; //Se captura el objeto "error" recibido por el servidor
-        if(Array.isArray(errorData.message)){
-          console.error('Errores multiples del servidor:\n', errorData.message.join('\n'));  //Desplegamos mensajes
-        }
-        else{
-          console.error('Error unico del servidor:\n', errorData.message);  //Desplegamos mensajes
-        }
-        return errorData;
-      }
-      else{
-        console.error('Error en la peticion:\n', error.message);
-        return defaultErrorResponse;
-      }
-    }
-  }
+  //Aplicando Clean Architecture + MVVM
+  //Primero se implementa la clase que no recibe ninguna otra clase
+  const authService = new AuthService();
+  const authRepository = new AuthRepositoryImpl(authService);
+  const loginUseCase = new LoginUseCase(authRepository);
+  const loginViewModel = new LoginViewModel(loginUseCase);
+
 
   return (
     <View style={styles.container}>
@@ -87,7 +70,8 @@ const LoginScreen = ({ navigation, route }: Props) => {
           }}
           validate={validations}
           onSubmit={async (values) => {
-            await login(values.email, values.password);
+            const response = await loginViewModel.login(values.email, values.password);
+            console.log("RESPONSE:\n", response);
           }}
         >{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => <View>
           <DefaultTextInput
