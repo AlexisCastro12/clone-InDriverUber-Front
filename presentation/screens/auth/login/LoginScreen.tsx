@@ -67,7 +67,8 @@ const LoginScreen = ({ navigation, route }: Props) => {
           }}
           validate={validations}
           onSubmit={async (values) => {
-            const response = await loginViewModel.login(values.email.trim(), values.password);
+            //Se envia el correo en formato limpio (todo en minusculas y sin espacios al principio y al final)
+            const response = await loginViewModel.login(values.email.trim().toLowerCase(), values.password);
             console.log("RESPONSE:\n", response);
           }}
         >{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => <View>
