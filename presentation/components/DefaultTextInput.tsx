@@ -1,10 +1,10 @@
-import {Image, View, TextInput, StyleSheet, KeyboardType} from 'react-native'
+import {Image, View, TextInput, StyleSheet, KeyboardType, TextInputFocusEventData, NativeSyntheticEvent} from 'react-native'
 
 interface Props{ 
   placeholder: string,
   value: string,
   onChangeText: (text: string) => void,
-  onBlur?: () => void,
+  onBlur?: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void,
   keyboardType?: KeyboardType,
   icon: any,      //Se recibe cualquier tipo de dato
   secureTextEntry?: boolean,    //para contraseñas
@@ -34,8 +34,8 @@ const DefaultTextInput = ({
             placeholder={placeholder}
             value = {value}
             placeholderTextColor= {placeholderTextColor || 'white'}
-            onChangeText={ text => onChangeText(text)}
-            onBlur={() => onBlur}
+            onChangeText={onChangeText}
+            onBlur={onBlur}
             keyboardType={keyboardType || 'default' /*opcion B para poner valores por defecto en propiedades opcionales*/}
             secureTextEntry={secureTextEntry}
           />

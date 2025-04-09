@@ -76,7 +76,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
             placeholder='Correo Electronico'
             value={values.email}
             onChangeText={handleChange('email')}
-            onBlur={() => handleBlur('email')}
+            onBlur={handleBlur('email')}
             keyboardType='email-address'
           />
           {errors.email && touched.email ? (<Text style={styles.errorText}>{errors.email}</Text>) : null}
@@ -85,7 +85,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
             icon={require('../../../../assets/password.png')}
             placeholder='Contraseña'
             onChangeText={handleChange('password')}
-            onBlur={() => handleBlur('password')}
+            onBlur={handleBlur('password')}
             secureTextEntry={true}
             value={values.password}
           />
