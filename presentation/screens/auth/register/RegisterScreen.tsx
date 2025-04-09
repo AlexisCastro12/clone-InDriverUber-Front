@@ -13,6 +13,8 @@ import DefaultRoundedButton from "../../../components/DefaultRoundedButton";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../../navigator/MainStackNavigator";
 import { Formik } from "formik";
+import { container } from "../../../../di/container";
+import { RegisterViewModel } from "./RegisterViewModel";
 
 interface Props
   extends StackScreenProps<RootStackParamList, "RegisterScreen"> {}
@@ -62,7 +64,8 @@ const RegisterScreen = ({ navigation, route }: Props) => {
     if (!values.phone) {
       errors.phone = "El telefono es obligatorio";
     } else if (!RegExpPhone.test(values.phone)) {
-      if (values.phone.replace(/\D/g, "").length !== 10) errors.phone = "El número telefonico debe tener 10 digitos";
+      if (values.phone.replace(/\D/g, "").length !== 10)
+        errors.phone = "El número telefonico debe tener 10 digitos";
       else
         errors.phone =
           "El numero telefonico no tiene un formato válido\n(1234567890, 123 456 7890, 123-456-7890, 123.456.7890)";
@@ -75,11 +78,13 @@ const RegisterScreen = ({ navigation, route }: Props) => {
     //VALIDACION CONFIRMPASSWORD
     if (!values.confirmPassword) {
       errors.confirmPassword = "Es necesario confirmar la contraseña";
-    } else if (values.password !== values.confirmPassword) 
+    } else if (values.password !== values.confirmPassword)
       errors.confirmPassword = "Las contraseñas no coinciden";
     return errors;
   };
 
+  const registerViewModel: RegisterViewModel =
+    container.resolve("registerViewModel");
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -117,21 +122,20 @@ const RegisterScreen = ({ navigation, route }: Props) => {
               }}
               validate={validations}
               onSubmit={async (values) => {
-                // SEGUNDA PARTE, CONEXION A BACKEND CON CA, DI y MVVM
-                // const response = await loginViewModel.login(
-                //   values.email.trim(),
-                //   values.password
-                // );
-
-                // PRIMERA PARTE, RECORDAR ESTANDARIZAR Y LIMPIAR RESPUESTAS
-                // Estandarizamos los numeros a 1234567890
-                // let phoneClean: string = values.phone.replace(/\D/g, "");
-                // eliminamos espacios antes y despues de la cadena (entrada limpia de datos)
-                // const nombre = inputNombre.trim();
-                // const apellido = inputApellido.trim();
-                // El correo se estandariza a todas minusculas y se trimea
-                // const correo = inputCorreo.trim().toLowerCase();
-                console.log("RESPONSE:\n", values);
+                // CONEXION A BACKEND CON CA, DI y MVVM
+                // const response = await loginViewModel.login(values.email.trim().toLowerCase(), values.password);
+                // En login se enviaron 2 variables (var1,var2) porque asi se definio el metodo, en register se envia un objeto ({obj})
+                const response = await registerViewModel.register({
+                  name: values.name.trim(),
+                  lastname: values.lastname.trim(),
+                  email: values.email.toLowerCase(),
+                  // Estandarizamos los numeros a 1234567890
+                  phone: values.phone.replace(/\D/g, ""),
+                  password: values.password,
+                  // No se agrega rol porque ne backend se crea por defecto
+                  // Si se crean screens diferentes para login de usuario/cliente y usuario/conductor ahi si se envian dependiendo de la screen
+                });
+                console.log("PROCESO DE REGISTRO TERMINADO");
               }}
             >
               {({
