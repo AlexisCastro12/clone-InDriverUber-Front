@@ -38,6 +38,10 @@ const styles = StyleSheet.create({
     height: 35,
     top: 20,
     
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   }
 })
 
