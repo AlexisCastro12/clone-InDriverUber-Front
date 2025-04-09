@@ -89,7 +89,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
             secureTextEntry={true}
             value={values.password}
           />
-          {errors.password && touched.email ? (<Text style={styles.errorText}>{errors.password}</Text>) : null}
+          {errors.password && touched.password ? (<Text style={styles.errorText}>{errors.password}</Text>) : null}
 
           <DefaultRoundedButton
             text='INICIAR SESION'
