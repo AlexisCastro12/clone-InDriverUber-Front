@@ -19,12 +19,12 @@ const LoginScreen = ({ navigation, route }: Props) => {
 
   let RegExpEmail = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/; //We use the RFC 5322 compliant regex to validate the email
   const validations = (values: {
-    email: string;
+    email: string,
     password: string
   }) => {   //Aqui termina la definicion de la Arrow Function pero se colocan en lista los atributos de values por si se desean agregar mas
     //OBJETO QUE ALMACENA LOS POSIBLES ERRORES EN EL FORMULARIO
     const errors: {
-      email?: string;
+      email?: string,
       password?: string
     } = {};
     //VALIDACION EMAIL
@@ -67,7 +67,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
           }}
           validate={validations}
           onSubmit={async (values) => {
-            const response = await loginViewModel.login(values.email, values.password);
+            const response = await loginViewModel.login(values.email.trim(), values.password);
             console.log("RESPONSE:\n", response);
           }}
         >{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => <View>
