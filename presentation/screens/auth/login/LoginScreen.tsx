@@ -5,11 +5,8 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackParamList } from '../../../navigator/MainStackNavigator';
 import styles from './Styles'
 import { Formik } from 'formik';
-import { AuthService } from '../../../../data/sources/remote/services/AuthService';
-import { AuthRepositoryImpl } from '../../../../data/repository/AuthRepositoryImpl';
-import { LoginUseCase } from '../../../../domain/useCases/auth/LoginUseCase';
-import { LoginViewModel } from './LoginViewModel';
 import { container } from '../../../../di/container';
+import { LoginViewModel } from './LoginViewModel';
 
 
 
@@ -43,7 +40,7 @@ const LoginScreen = ({ navigation, route }: Props) => {
   }
 
   //Aplicando Clean Architecture + MVVM + Dependency Injection
-  const loginViewModel = container.resolve('loginViewModel');
+  const loginViewModel: LoginViewModel = container.resolve('loginViewModel');
 
 
   return (
