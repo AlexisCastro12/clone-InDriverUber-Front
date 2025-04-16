@@ -12,7 +12,7 @@ interface Props {
 const DefaultRoundedButton = ({ text, onPress, backgroundColor }: Props) => {
   return (
     <Pressable style={[styles.roundedButton, {backgroundColor: backgroundColor || 'red'}]}
-      onPress={() => onPress()}>
+      onPress={onPress}>
       <Text style={styles.textButton}>{text}</Text>
     </Pressable>
   )
