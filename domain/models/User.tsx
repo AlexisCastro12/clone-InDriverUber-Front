@@ -9,5 +9,5 @@ export interface User {
   password?:            string; //Solo se envia el password la primera vez para guardarla y de ahi ya no regresa en futuras peticiones
   image?:               string;
   notification_token?:  null;
-  roles?:               Role[];
+  roles?:               Role[]; //Opcional porque al registrarse inicialmente el usuario no envia el rol, se asigna en automatico por el backend
 }
