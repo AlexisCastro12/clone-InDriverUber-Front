@@ -1,16 +1,16 @@
 import { AuthResponse } from "../../../../domain/models/AuthResponse";
 import { ErrorResponse } from "../../../../domain/models/ErrorResponse";
 import { User } from "../../../../domain/models/User";
-import { RegisterUseCase } from "../../../../domain/useCases/auth/RegisterUseCase";
+import { AuthUseCases } from "../../../../domain/useCases/auth/AuthUseCases";
 
 export class RegisterViewModel {
-  private registerUseCase: RegisterUseCase;
+  private authUseCases: AuthUseCases;
 
-  constructor({registerUseCase}: {registerUseCase: RegisterUseCase}){
-    this.registerUseCase = registerUseCase;
+  constructor({ authUseCases }: { authUseCases: AuthUseCases }) {
+    this.authUseCases = authUseCases;
   }
 
-  async register(user:User): Promise<AuthResponse | ErrorResponse>{
-    return await this.registerUseCase.execute(user);
+  async register(user: User): Promise<AuthResponse | ErrorResponse> {
+    return await this.authUseCases.register.execute(user);
   }
 }
