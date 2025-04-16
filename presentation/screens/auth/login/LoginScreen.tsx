@@ -11,8 +11,6 @@ import { useAuth } from '../../../hooks/useAuth';
 import { AuthResponse } from '../../../../domain/models/AuthResponse';
 import { ErrorResponse } from '../../../../domain/models/ErrorResponse';
 
-
-
 interface Props extends StackScreenProps<RootStackParamList, 'LoginScreen'> { }
 
 const LoginScreen = ({ navigation, route }: Props) => {
