@@ -1,4 +1,4 @@
-import { Role } from "react-native";
+import { Role } from "./Role";
 
 export interface User {
   id?:                  number; //No se envia el id cuando se registra un usuario porque este se asigna hasta insertarse en la bbdd
