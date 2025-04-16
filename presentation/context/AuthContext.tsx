@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from "react";
 import { AuthResponse } from "../../domain/models/AuthResponse";
-import { LocalStorage } from "../../data/sources/local/LocalStorage";
 
 export interface AuthContextProps {
   authResponse: AuthResponse | null,
