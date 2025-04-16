@@ -7,6 +7,9 @@ import styles from './Styles'
 import { Formik } from 'formik';
 import { container } from '../../../../di/container';
 import { LoginViewModel } from './LoginViewModel';
+import { useAuth } from '../../../hooks/useAuth';
+import { AuthResponse } from '../../../../domain/models/AuthResponse';
+import { ErrorResponse } from '../../../../domain/models/ErrorResponse';
 
 
 
@@ -42,6 +45,8 @@ const LoginScreen = ({ navigation, route }: Props) => {
   //Aplicando Clean Architecture + MVVM + Dependency Injection
   const loginViewModel: LoginViewModel = container.resolve('loginViewModel');
 
+  // Usando contexto para manejar datos de autenticacion
+  const { authResponse, saveAuthSession } =useAuth();
 
   return (
     <View style={styles.container}>
@@ -65,7 +70,11 @@ const LoginScreen = ({ navigation, route }: Props) => {
           validate={validations}
           onSubmit={async (values) => {
             //Se envia el correo en formato limpio (todo en minusculas y sin espacios al principio y al final)
-            const response = await loginViewModel.login(values.email.trim().toLowerCase(), values.password);
+            const response: AuthResponse | ErrorResponse = await loginViewModel.login(values.email.trim().toLowerCase(), values.password);
+            if('token' in response) { // LOGIN EXITOSO
+              saveAuthSession(response);
+              console.log('LOGIN EXITOSO Y ALMACENADO LOCALMENTE');
+            }
             console.log("RESPONSE:\n", response);
           }}
         >{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => <View>
