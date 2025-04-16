@@ -11,7 +11,7 @@ export class AuthService {
         email: email,
         password: password
       });
-      console.log("Server Response: ", response.data);
+      console.log("Server Response after LOGIN: ", response.data);
       return response.data; //Resuelve la promesa con un AuthResponse
     } catch (error: any) {
       if(error.response) {
@@ -35,7 +35,7 @@ export class AuthService {
     try {
       //Aprovechamos que tenemos un modelo usuario para enviar todos los campos sin necesidad de especificar C/U
       const response = await ApiRequestHandler.post<AuthResponse>('/auth/register', user);
-      console.log("Server Response: ", response.data);
+      console.log("Server Response after REGISTER: ", response.data);
       return response.data; //Resuelve la promesa con un AuthResponse
     } catch (error: any) {
       if(error.response) {
