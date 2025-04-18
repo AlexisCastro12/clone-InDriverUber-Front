@@ -5,6 +5,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  image: {
+    width: 150,
+    height: 150,
+    marginBottom: 5,
+    marginTop: 15,
+  },
+
+  textItem: {
+    alignSelf: 'center',
+    fontSize: 22,
+  },
+
+  flatListContent: {
+    flexGrow: 1, 
+    justifyContent: 'center' 
   }
 })
 

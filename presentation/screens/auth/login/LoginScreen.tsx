@@ -71,8 +71,8 @@ const LoginScreen = ({ navigation, route }: Props) => {
             const response: AuthResponse | ErrorResponse = await loginViewModel.login(values.email.trim().toLowerCase(), values.password);
             if('token' in response) { // LOGIN EXITOSO
               saveAuthSession(response);
-              navigation.navigate('RolesScreen');
               console.log('LOGIN EXITOSO Y ALMACENADO LOCALMENTE');
+              navigation.navigate('RolesScreen');
             }
             console.log("RESPONSE:\n", response);
           }}

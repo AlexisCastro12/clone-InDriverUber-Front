@@ -2,8 +2,8 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigator/MainStackNavigator";
 import { FlatList, Text, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
-import { Role } from "../../../domain/models/Role";
 import styles from "./Styles";
+import RolesItem from "./RolesItem";
 
 
 interface Props extends StackScreenProps<RootStackParamList, 'RolesScreen'>{};
@@ -13,9 +13,10 @@ export default function RolesScreen({navigation, route}: Props) {
     return (
       <View style={styles.container}>
         <FlatList
+          contentContainerStyle = {styles.flatListContent}
           data={authResponse?.user.roles}
           keyExtractor={(item) => item.id}
-          renderItem={({item}) => <Text>{item.name}</Text>}
+          renderItem={({item}) => <RolesItem role={item}/>}
         />
       </View>
     )
