@@ -14,14 +14,14 @@ export default function RolesItem({ navigation, role }: Props) {
     <Pressable 
     onPress={() => {
       if(role.id == 'ADMIN'){
-        navigation.navigate('AdminHomeScreen');
+        navigation.replace('AdminHomeScreen');
       }
       else if(role.id == 'CLIENT'){
-        navigation.navigate('ClientHomeScreen');
+        navigation.replace('ClientHomeScreen');
       }
       else if(role.id == 'DRIVER')
       {
-        navigation.navigate('DriverHomeScreen');
+        navigation.replace('DriverHomeScreen');
       }
     }} 
     hitSlop={5}>

@@ -53,9 +53,9 @@ const LoginScreen = ({ navigation, route }: Props) => {
   useEffect(() => {
     if (authResponse) {
       if (authResponse.user.roles!.length > 1) {
-        navigation.navigate("RolesScreen");
+        navigation.replace("RolesScreen");
       } else {
-        navigation.navigate("ClientHomeScreen");
+        navigation.replace("ClientHomeScreen");
       }
     }
   }, [authResponse]);
