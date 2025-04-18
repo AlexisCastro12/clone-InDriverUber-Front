@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigator/MainStackNavigator";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import styles from "./Styles";
 import RolesItem from "./RolesItem";
