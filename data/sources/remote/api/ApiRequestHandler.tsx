@@ -1,7 +1,8 @@
+import Constants from 'expo-constants';
 import axios from "axios";
 
 const ApiRequestHandler = axios.create({
-  baseURL:  "http://192.168.3.18:3000",
+  baseURL:  Constants.expoConfig!.extra!.backendApiUrl,
   headers: {
     'Content-Type': 'application/json'
   }

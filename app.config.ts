@@ -20,7 +20,7 @@ export default () => ({
         NSLocationWhenInUseUsageDescription: "Esta app utiliza tu ubicación para mostrarte tu posición en el mapa.",
       },
       config: {
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       }
     },
     android: {
@@ -39,7 +39,8 @@ export default () => ({
       favicon: "./assets/favicon.png"
     },
     extra: {
-      googleApiKey: process.env.GOOGLE_MAPS_API_KEY
+      googleApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      backendApiUrl: process.env.BACKEND_API_URL,
     }
   }
 });
