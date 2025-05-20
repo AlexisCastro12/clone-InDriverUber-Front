@@ -132,7 +132,7 @@ const RegisterScreen = ({ navigation, route }: Props) => {
                   // Estandarizamos los numeros a 1234567890
                   phone: values.phone.replace(/\D/g, ""),
                   password: values.password,
-                  // No se agrega rol porque ne backend se crea por defecto
+                  // No se agrega rol porque en backend se crea por defecto
                   // Si se crean screens diferentes para login de usuario/cliente y usuario/conductor ahi si se envian dependiendo de la screen
                 });
                 console.log("PROCESO DE REGISTRO TERMINADO");
