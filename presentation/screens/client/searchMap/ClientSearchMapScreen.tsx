@@ -5,12 +5,31 @@ import MapView, { LatLng, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import Constants from "expo-constants";
+import { container } from "../../../../di/container";
+import { PlaceDetail } from "../../../../domain/models/PlaceDetail";
 
 export default function ClientSearchMapScreen() {
   const [location, setLocation] = useState<Region | undefined>(undefined);
   const [selectePlace, setSelectPlace] = useState<LatLng | undefined>();
   const [inputText, setInputText] = useState<string>('')
   const autocompleteTextRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const viewModel = container.resolve('clientSearchMapViewModel')
+  
+  // Para imprimir el useState porque se setea asincronicamente
+  useEffect(() => {
+    console.log('RESPONSE Selected Place:\n', selectePlace);
+  }, [selectePlace])  //Hasta que cambia selectedPlace se imprime
+  const handleGetPlaceDetails = async (placeId: string) => {
+    const response: PlaceDetail | null  = await viewModel.getPlaceDetails(placeId);
+    const lat = response!.result.geometry.location.lat;
+    const lng = response!.result.geometry.location.lng;
+    setSelectPlace({
+      latitude: lat,
+      longitude: lng,
+    })
+  }
+
+  // Permisos de ubicacion del dispositivo
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -59,6 +78,7 @@ export default function ClientSearchMapScreen() {
         placeholder="Intoduce punto de partida"
         onPress={(data) => {
           setInputText(data.description);
+          handleGetPlaceDetails(data.place_id);
           console.log(data);
         }}
         textInputProps={{

@@ -10,17 +10,24 @@ import { SaveAuthSessionUseCase } from "../domain/useCases/auth/SaveAuthSessionU
 import { GetAuthSessionUseCase } from "../domain/useCases/auth/GetAuthSessionUseCase";
 import { RemoveAuthSessionUseCase } from "../domain/useCases/auth/RemoveAuthSessionUseCase";
 import { AuthUseCases } from "../domain/useCases/auth/AuthUseCases";
+import { GooglePlacesService } from "../data/sources/remote/services/GooglePlacesService";
+import { GooglePlacesRepositoryImpl } from "../data/repository/GooglePlacesRepositoryImpl";
+import { GetPlaceDetailsUseCase } from "../domain/useCases/googlePlaces/GetPlaceDetailsUseCase";
+import { GooglePlacesUseCases } from "../domain/useCases/googlePlaces/GooglePlacesUseCases";
+import { ClientSearchMapViewModel } from "../presentation/screens/client/searchMap/ClientSearchMapViewModel";
 
 const container = createContainer();
 
 container.register({
   // SERVICES
   authService: asClass(AuthService).singleton(),
+  googlePlacesService: asClass(GooglePlacesService).singleton(),
   localStorage: asClass(LocalStorage).singleton(),
-  
+
   // REPOSITORIES
   authRepository: asClass(AuthRepositoryImpl).singleton(),
-  
+  googlePlacesRepository: asClass(GooglePlacesRepositoryImpl).singleton(),
+
   // USE CASES
   loginUseCase: asClass(LoginUseCase).singleton(),
   registerUseCase: asClass(RegisterUseCase).singleton(),
@@ -28,10 +35,14 @@ container.register({
   getAuthSessionUseCase: asClass(GetAuthSessionUseCase).singleton(),
   removeAuthSessionUseCase: asClass(RemoveAuthSessionUseCase).singleton(),
   authUseCases: asClass(AuthUseCases).singleton(),
+  getPlaceDetailsUseCase: asClass(GetPlaceDetailsUseCase).singleton(),
+  googlePlacesUseCases: asClass(GooglePlacesUseCases).singleton(),
   
   // VIEW MODELS
   loginViewModel: asClass(LoginViewModel).singleton(),
   registerViewModel: asClass(RegisterViewModel).singleton(),
+  clientSearchMapViewModel: asClass(ClientSearchMapViewModel),
+  
 });
 
 export { container };

@@ -8,4 +8,11 @@ const ApiRequestHandler = axios.create({
   }
 });
 
-export {ApiRequestHandler};
+const GoogleApiRequestHandler = axios.create({
+  baseURL:  Constants.expoConfig!.extra!.googleApiUrl,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+export {ApiRequestHandler, GoogleApiRequestHandler};

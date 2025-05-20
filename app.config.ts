@@ -45,6 +45,7 @@ export default () => ({
     },
     extra: {
       googleApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      googleApiUrl: process.env.GOOGLE_API_URL,
       backendApiUrl: process.env.BACKEND_API_URL,
     }
   }
