@@ -15,6 +15,7 @@ import { GooglePlacesRepositoryImpl } from "../data/repository/GooglePlacesRepos
 import { GetPlaceDetailsUseCase } from "../domain/useCases/googlePlaces/GetPlaceDetailsUseCase";
 import { GooglePlacesUseCases } from "../domain/useCases/googlePlaces/GooglePlacesUseCases";
 import { ClientSearchMapViewModel } from "../presentation/screens/client/searchMap/ClientSearchMapViewModel";
+import { GetPlaceDetailsByCoordsUseCase } from "../domain/useCases/googlePlaces/GetPlaceDetailsByCoordsUseCase";
 
 const container = createContainer();
 
@@ -36,6 +37,7 @@ container.register({
   removeAuthSessionUseCase: asClass(RemoveAuthSessionUseCase).singleton(),
   authUseCases: asClass(AuthUseCases).singleton(),
   getPlaceDetailsUseCase: asClass(GetPlaceDetailsUseCase).singleton(),
+  getPlaceDetailsByCoordsUseCase: asClass(GetPlaceDetailsByCoordsUseCase).singleton(),
   googlePlacesUseCases: asClass(GooglePlacesUseCases).singleton(),
   
   // VIEW MODELS

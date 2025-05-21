@@ -1,4 +1,4 @@
-import { Platform, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, View } from "react-native";
 import styles from "./Styles";
 import { useEffect, useRef, useState } from "react";
 import MapView, { LatLng, Marker, Region } from "react-native-maps";
@@ -7,6 +7,7 @@ import { GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from "react-nat
 import Constants from "expo-constants";
 import { container } from "../../../../di/container";
 import { PlaceDetail } from "../../../../domain/models/PlaceDetail";
+import { PlaceGeocodeDetail } from "../../../../domain/models/PlaceGeocodeDetail";
 
 export default function ClientSearchMapScreen() {
   const [location, setLocation] = useState<Region | undefined>(undefined);
@@ -19,14 +20,26 @@ export default function ClientSearchMapScreen() {
   useEffect(() => {
     console.log('RESPONSE Selected Place:\n', selectePlace);
   }, [selectePlace])  //Hasta que cambia selectedPlace se imprime
+  
+  // Generar coordenadas de un lugar a partir de texto plano (Google Autocomplete y placeId)
   const handleGetPlaceDetails = async (placeId: string) => {
     const response: PlaceDetail | null  = await viewModel.getPlaceDetails(placeId);
-    const lat = response!.result.geometry.location.lat;
-    const lng = response!.result.geometry.location.lng;
-    setSelectPlace({
-      latitude: lat,
-      longitude: lng,
-    })
+    if(response !== null) {
+      const lat = response!.result.geometry.location.lat;
+      const lng = response!.result.geometry.location.lng;
+      setSelectPlace({
+        latitude: lat,
+        longitude: lng,
+      })
+    }
+  }
+
+  // Generar direcciones a partir de un par de coordenadas (lat,lng)
+  const handleGetPlaceDetailsByCoords = async (lat: number, lng: number) => {
+    const response: PlaceGeocodeDetail | null  = await viewModel.getPlaceDetailsByCoords(lat,lng);
+    if(response !== null) {
+      console.log('RESPONSE BY COORDS:\n', response.results[0]);
+    }
   }
 
   // Permisos de ubicacion del dispositivo
@@ -44,6 +57,7 @@ export default function ClientSearchMapScreen() {
           console.log("Permiso de ubicación en segundo plano denegado");
           return;
         }
+
       }
 
       let location = await Location.getCurrentPositionAsync({});
@@ -53,6 +67,10 @@ export default function ClientSearchMapScreen() {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
+      setSelectPlace({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      })
     })();
   }, []);
 
@@ -62,14 +80,21 @@ export default function ClientSearchMapScreen() {
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} initialRegion={location}>
-        <Marker
+      <MapView 
+        style={styles.map} 
+        initialRegion={location}
+        onRegionChangeComplete={(region)=>{
+          console.log('REGION:\n',region);
+          handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
+        }}
+      >
+        {/* <Marker
           coordinate={{
             latitude: location!.latitude,
             longitude: location!.longitude,
           }}
           title="Mi ubicación"
-        />
+        /> */}
       </MapView>
       <GooglePlacesAutocomplete
         ref={autocompleteTextRef}
@@ -110,7 +135,11 @@ export default function ClientSearchMapScreen() {
             <></>
           )
         }
-      ></GooglePlacesAutocomplete>
+      />
+      <Image
+      style={styles.pinImage}
+        source={require('../../../../assets/pin_red.png')}
+      />
     </View>
   );
 }

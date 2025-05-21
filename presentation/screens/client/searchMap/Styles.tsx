@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   map: {
@@ -30,6 +32,13 @@ const styles = StyleSheet.create({
   clearText: {
     fontSize: 22,
     color: '#888'
+  },
+
+  pinImage: {
+    position: 'absolute',
+    height: 50,
+    width: 50,
+
   }
 })
 
