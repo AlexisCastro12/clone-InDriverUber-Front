@@ -19,8 +19,8 @@ export default function ClientSearchMapScreen() {
   // Para imprimir el useState porque se setea asincronicamente
   useEffect(() => {
     console.log('RESPONSE Selected Place:\n', selectePlace);
-  }, [selectePlace])  //Hasta que cambia selectedPlace se imprime
-  
+  }, [selectePlace])  //Hasta que cambia, selectedPlace se imprime
+
   // Generar coordenadas de un lugar a partir de texto plano (Google Autocomplete y placeId)
   const handleGetPlaceDetails = async (placeId: string) => {
     const response: PlaceDetail | null  = await viewModel.getPlaceDetails(placeId);
@@ -38,7 +38,10 @@ export default function ClientSearchMapScreen() {
   const handleGetPlaceDetailsByCoords = async (lat: number, lng: number) => {
     const response: PlaceGeocodeDetail | null  = await viewModel.getPlaceDetailsByCoords(lat,lng);
     if(response !== null) {
-      console.log('RESPONSE BY COORDS:\n', response.results[0]);
+      const address = response.results[0].formatted_address;
+      console.log('DIRECCION: ',address);
+      await autocompleteTextRef.current?.setAddressText(address);
+      await setInputText(address);
     }
   }
 
@@ -64,8 +67,8 @@ export default function ClientSearchMapScreen() {
       setLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitudeDelta: 0.00922,
+        longitudeDelta: 0.00421,
       });
       setSelectPlace({
         latitude: location.coords.latitude,
@@ -99,7 +102,10 @@ export default function ClientSearchMapScreen() {
       <GooglePlacesAutocomplete
         ref={autocompleteTextRef}
         minLength={4}
-        styles={{container: styles.placeAutocomplete}}
+        styles={{
+          container: styles.placeAutocomplete,
+          textInput: styles.textInputAutocomplete
+        }}
         placeholder="Intoduce punto de partida"
         onPress={(data) => {
           setInputText(data.description);
@@ -122,14 +128,14 @@ export default function ClientSearchMapScreen() {
         renderRightButton={() =>
           inputText.length > 0 ? (
             <Pressable
-              onPress={() => {
+              onPress={async () => {
                 console.log('clear');
-                autocompleteTextRef.current?.setAddressText('');
-                setInputText('');
+                await autocompleteTextRef.current?.setAddressText('');
+                await setInputText('');
               }}
-              style={styles.clearButton}
+              style={styles.clearAutocompleteButton}
             >
-              <Text style={styles.clearText}>×</Text>
+              <Text style={styles.clearAutocompleteText}>×</Text>
             </Pressable>
           ) : (
             <></>
@@ -137,7 +143,7 @@ export default function ClientSearchMapScreen() {
         }
       />
       <Image
-      style={styles.pinImage}
+      style={styles.pinImageMap}
         source={require('../../../../assets/pin_red.png')}
       />
     </View>

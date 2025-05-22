@@ -20,7 +20,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  clearButton: {
+  textInputAutocomplete: {
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    paddingRight: 38,
+  },
+
+  clearAutocompleteButton: {
     paddingHorizontal: 10,
     position: 'absolute',
     right: 5,
@@ -29,12 +36,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   
-  clearText: {
+  clearAutocompleteText: {
     fontSize: 22,
     color: '#888'
   },
 
-  pinImage: {
+  pinImageMap: {
     position: 'absolute',
     height: 50,
     width: 50,
