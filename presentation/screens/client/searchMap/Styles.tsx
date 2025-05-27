@@ -12,9 +12,17 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  placeAutocomplete: {
+  placeOriginAutocomplete: {
     position: 'absolute',
     top: 10,
+    left: 10,
+    right: 10,
+    zIndex: 2,
+  },
+
+  placeDestinationAutocomplete: {
+    position: 'absolute',
+    top: 60,
     left: 10,
     right: 10,
     zIndex: 1,
