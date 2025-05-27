@@ -1,7 +1,7 @@
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, TextInput, View } from "react-native";
 import styles from "./Styles";
 import { useEffect, useRef, useState } from "react";
-import MapView, { LatLng, Marker, Region } from "react-native-maps";
+import MapView, { Camera, LatLng, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 import Constants from "expo-constants";
@@ -14,6 +14,8 @@ export default function ClientSearchMapScreen() {
   const [selectePlace, setSelectPlace] = useState<LatLng | undefined>();
   const [inputText, setInputText] = useState<string>('')
   const autocompleteTextRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const mapRef = useRef<MapView>(null);
+  const [isUserMovingMap, setIsUserMovingMap] = useState<boolean>(true);
   const viewModel = container.resolve('clientSearchMapViewModel')
   
   // Para imprimir el useState porque se setea asincronicamente
@@ -21,7 +23,7 @@ export default function ClientSearchMapScreen() {
     console.log('RESPONSE Selected Place:\n', selectePlace);
   }, [selectePlace])  //Hasta que cambia, selectedPlace se imprime
 
-  // Generar coordenadas de un lugar a partir de texto plano (Google Autocomplete y placeId)
+  // Generar coordenadas de un lugar a partir de texto plano (Google Autocomplete y placeId) - GEOCODIFICAR
   const handleGetPlaceDetails = async (placeId: string) => {
     const response: PlaceDetail | null  = await viewModel.getPlaceDetails(placeId);
     if(response !== null) {
@@ -31,10 +33,12 @@ export default function ClientSearchMapScreen() {
         latitude: lat,
         longitude: lng,
       })
+      // Despues de obtener las coordenadas de un lugar especifico se mueve el mapa a ese punto
+      moveMapToLocation(lat,lng);
     }
   }
 
-  // Generar direcciones a partir de un par de coordenadas (lat,lng)
+  // Generar direcciones a partir de un par de coordenadas (lat,lng) - GEODECODIFICAR
   const handleGetPlaceDetailsByCoords = async (lat: number, lng: number) => {
     const response: PlaceGeocodeDetail | null  = await viewModel.getPlaceDetailsByCoords(lat,lng);
     if(response !== null) {
@@ -43,6 +47,24 @@ export default function ClientSearchMapScreen() {
       await autocompleteTextRef.current?.setAddressText(address);
       await setInputText(address);
     }
+  }
+
+  const moveMapToLocation = (lat: number, lng: number) => {
+    setIsUserMovingMap(false);
+     // A partir de aqui, cualquier cambio en el mapa sera mediante programacion
+    const camera: Camera = {
+      center: {
+        latitude: lat,
+        longitude: lng,
+      },
+      pitch: 0,
+      heading: 0,
+      zoom: 17,
+    };
+    mapRef.current?.animateCamera(camera, {duration: 1000})
+    setTimeout(() => {
+      setIsUserMovingMap(true);
+    }, 1200); // Despues de los cambios por programacion en el mapa, todos los cambios solo seran por el usuario
   }
 
   // Permisos de ubicacion del dispositivo
@@ -84,9 +106,12 @@ export default function ClientSearchMapScreen() {
   return (
     <View style={styles.container}>
       <MapView 
+        ref={mapRef}
         style={styles.map} 
         initialRegion={location}
         onRegionChangeComplete={(region)=>{
+          //Si el usuario no esta moviendo el mapa (el mapa se mueve por autocomplete) entonces no geodecodifica
+          if(!isUserMovingMap) return
           console.log('REGION:\n',region);
           handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
         }}
