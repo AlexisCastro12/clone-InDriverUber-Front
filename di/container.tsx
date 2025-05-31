@@ -16,6 +16,7 @@ import { GetPlaceDetailsUseCase } from "../domain/useCases/googlePlaces/GetPlace
 import { GooglePlacesUseCases } from "../domain/useCases/googlePlaces/GooglePlacesUseCases";
 import { ClientSearchMapViewModel } from "../presentation/screens/client/searchMap/ClientSearchMapViewModel";
 import { GetPlaceDetailsByCoordsUseCase } from "../domain/useCases/googlePlaces/GetPlaceDetailsByCoordsUseCase";
+import { GetDirectionsUseCase } from "../domain/useCases/googlePlaces/GetDirectionsUseCase";
 
 const container = createContainer();
 
@@ -39,6 +40,7 @@ container.register({
   getPlaceDetailsUseCase: asClass(GetPlaceDetailsUseCase).singleton(),
   getPlaceDetailsByCoordsUseCase: asClass(GetPlaceDetailsByCoordsUseCase).singleton(),
   googlePlacesUseCases: asClass(GooglePlacesUseCases).singleton(),
+  getDirectionsUseCase: asClass(GetDirectionsUseCase).singleton(),
   
   // VIEW MODELS
   loginViewModel: asClass(LoginViewModel).singleton(),

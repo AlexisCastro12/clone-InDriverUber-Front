@@ -8,7 +8,13 @@ import {
 } from "react-native";
 import styles from "./Styles";
 import { useEffect, useRef, useState } from "react";
-import MapView, { Camera, LatLng, Marker, Region } from "react-native-maps";
+import MapView, {
+  Camera,
+  LatLng,
+  Marker,
+  Polyline,
+  Region,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import {
   GooglePlacesAutocomplete,
@@ -18,6 +24,9 @@ import Constants from "expo-constants";
 import { container } from "../../../../di/container";
 import { PlaceDetail } from "../../../../domain/models/PlaceDetail";
 import { PlaceGeocodeDetail } from "../../../../domain/models/PlaceGeocodeDetail";
+import { ClientSearchMapViewModel } from "./ClientSearchMapViewModel";
+import { GoogleDirections } from "../../../../domain/models/GoogleDirections";
+import { decode } from "@googlemaps/polyline-codec";
 
 export default function ClientSearchMapScreen() {
   const [location, setLocation] = useState<Region | undefined>(undefined);
@@ -39,12 +48,18 @@ export default function ClientSearchMapScreen() {
   >(undefined);
   const [originText, setOriginText] = useState<string>("");
   const [destinationText, setDestinationText] = useState<string>("");
+  const [isUserMovingMap, setIsUserMovingMap] = useState<boolean>(true);
+  const [directionsRoute, setDirectionsRoute] = useState<LatLng[]>([]);
+  const [shouldDrawRoute, setShouldDrawRoute] = useState<boolean>(false);
+
   const autocompleteOriginTextRef = useRef<GooglePlacesAutocompleteRef>(null);
   const autocompleteDestinationTextRef =
     useRef<GooglePlacesAutocompleteRef>(null);
   const mapRef = useRef<MapView>(null);
-  const [isUserMovingMap, setIsUserMovingMap] = useState<boolean>(true);
-  const viewModel = container.resolve("clientSearchMapViewModel");
+
+  const viewModel: ClientSearchMapViewModel = container.resolve(
+    "clientSearchMapViewModel"
+  );
 
   // Permisos de ubicacion del dispositivo
   useEffect(() => {
@@ -73,20 +88,39 @@ export default function ClientSearchMapScreen() {
     })();
   }, []);
 
-  // Para imprimir el useState porque se setea asincronicamente
   useEffect(() => {
-    if (originPlace !== undefined && destinationPlace !== undefined) {
+    if (originPlace !== undefined && destinationPlace !== undefined && shouldDrawRoute) {
       console.log("Ya se seleccionaron los datos de ubicacion");
       console.log("ORIGIN:\n", originPlace);
       console.log("DESTINATION:\n", destinationPlace);
+      handleGetDirections(); // Hasta que se seleccionen los dos lugares correctamente se traza la ruta
     } else {
-      console.log("Datos de ubicacion incompletos");
+      console.log("Error al dibujar la ruta");
     }
-  }, [originPlace, destinationPlace]);
+  }, [originPlace, destinationPlace, shouldDrawRoute]);
 
   if (!location) {
     return <View style={styles.container}></View>;
   }
+
+  const moveMapToLocation = (lat: number, lng: number) => {
+    setIsUserMovingMap(false);
+    // A partir de aqui, cualquier cambio en el mapa sera mediante programacion
+    const camera: Camera = {
+      center: {
+        latitude: lat,
+        longitude: lng,
+      },
+      pitch: 0,
+      heading: 0,
+      zoom: 17,
+    };
+    mapRef.current?.animateCamera(camera, { duration: 1000 });
+    setTimeout(() => {
+      setIsUserMovingMap(true);
+    }, 1200); // Despues de los cambios por programacion en el mapa, todos los cambios solo seran por el usuario
+  };
+
   // Generar coordenadas de un lugar a partir de texto plano (Google Autocomplete y placeId) - GEOCODIFICAR
   const handleGetPlaceDetails = async (placeId: string, isOrigin: boolean) => {
     const response: PlaceDetail | null = await viewModel.getPlaceDetails(
@@ -112,6 +146,7 @@ export default function ClientSearchMapScreen() {
           address: address,
         });
       }
+      setShouldDrawRoute(true); // Cada que se cambian los destinos desde el autocomplete
     }
   };
 
@@ -123,8 +158,14 @@ export default function ClientSearchMapScreen() {
       const address = response.results[0].formatted_address;
       console.log("DIRECCION Origen: ", address);
       // Solo se geodecodifica con el punto de partida (trabaja con el marcador en el mapa)
-      await autocompleteOriginTextRef.current?.setAddressText(address);
-      await setOriginText(address);
+      autocompleteOriginTextRef.current?.setAddressText(address);
+      if(originPlace === undefined) {
+        setShouldDrawRoute(true); // Cada que no este definido un punto de partida
+      }
+      else {
+        setShouldDrawRoute(false);
+      }
+      setOriginText(address);
       setOriginPlace({
         lat: lat,
         lng: lng,
@@ -133,24 +174,29 @@ export default function ClientSearchMapScreen() {
     }
   };
 
-  const moveMapToLocation = (lat: number, lng: number) => {
-    setIsUserMovingMap(false);
-    // A partir de aqui, cualquier cambio en el mapa sera mediante programacion
-    const camera: Camera = {
-      center: {
-        latitude: lat,
-        longitude: lng,
+  const handleGetDirections = async () => {
+    //Como ya manejara variables de estado (originPlace y destinationPlace) es mejor manejarla desde un useEffect
+    const response: GoogleDirections | null = await viewModel.getDirections(
+      {
+        latitude: originPlace!.lat,
+        longitude: originPlace!.lng,
       },
-      pitch: 0,
-      heading: 0,
-      zoom: 17,
-    };
-    mapRef.current?.animateCamera(camera, { duration: 1000 });
-    setTimeout(() => {
-      setIsUserMovingMap(true);
-    }, 1200); // Despues de los cambios por programacion en el mapa, todos los cambios solo seran por el usuario
+      {
+        latitude: destinationPlace!.lat,
+        longitude: destinationPlace!.lng,
+      }
+    );
+    if (response !== null) {
+      if (response.routes.length) {
+        const points = response.routes[0].overview_polyline.points;
+        const coordinates = decode(points).map(([lat, lng]) => ({
+          latitude: lat,
+          longitude: lng,
+        }));
+        setDirectionsRoute(coordinates);
+      }
+    }
   };
-
   return (
     <View style={styles.container}>
       <MapView
@@ -163,13 +209,36 @@ export default function ClientSearchMapScreen() {
           handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
         }}
       >
-        {/* <Marker
-          coordinate={{
-            latitude: location!.latitude,
-            longitude: location!.longitude,
+        {
+          originPlace && (
+            <Marker
+            coordinate={{
+            latitude: originPlace!.lat,
+            longitude: originPlace!.lng,
           }}
-          title="Mi ubicación"
-        /> */}
+          title="Punto de Partida"
+        />
+          )
+        }
+        {
+          destinationPlace && (
+            <Marker
+            coordinate={{
+            latitude: destinationPlace!.lat,
+            longitude: destinationPlace!.lng,
+          }}
+          title="Punto de Partida"
+        />
+          )
+        }
+        {
+        directionsRoute.length > 0 && (
+          <Polyline
+            coordinates={directionsRoute}
+            strokeWidth={6}
+            strokeColor="red"
+          />
+        )}
       </MapView>
       <GooglePlacesAutocomplete
         ref={autocompleteOriginTextRef}
