@@ -161,16 +161,16 @@ export default function ClientSearchMapScreen() {
       autocompleteOriginTextRef.current?.setAddressText(address);
       if(originPlace === undefined) {
         setShouldDrawRoute(true); // Cada que no este definido un punto de partida
+        setOriginPlace({
+          lat: lat,
+          lng: lng,
+          address: address,
+        }); // El marcador de partida solo se deja fijo siempre que no exista anteriormente
       }
       else {
         setShouldDrawRoute(false);
       }
       setOriginText(address);
-      setOriginPlace({
-        lat: lat,
-        lng: lng,
-        address: address,
-      });
     }
   };
 
@@ -202,6 +202,7 @@ export default function ClientSearchMapScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
+        zoomControlEnabled = {true}
         initialRegion={location}
         onRegionChangeComplete={(region) => {
           //Si el usuario no esta moviendo el mapa (el mapa se mueve por autocomplete) entonces no geodecodifica
@@ -217,7 +218,14 @@ export default function ClientSearchMapScreen() {
             longitude: originPlace!.lng,
           }}
           title="Punto de Partida"
-        />
+        >
+          <View style={{width:50, height:50}}>
+            <Image
+              source={require('../../../../assets/pin_map.png')}
+              style={{width:35, height:35, resizeMode: 'contain'}}
+            />
+          </View>
+        </Marker>
           )
         }
         {
@@ -228,7 +236,14 @@ export default function ClientSearchMapScreen() {
             longitude: destinationPlace!.lng,
           }}
           title="Punto de Partida"
-        />
+        >
+          <View style={{width:50, height:50}}>
+            <Image
+              source={require('../../../../assets/flag.png')}
+              style={{width:35, height:35, resizeMode: 'contain'}}
+            />
+          </View>
+        </Marker>
           )
         }
         {
