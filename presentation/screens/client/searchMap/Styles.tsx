@@ -49,6 +49,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#888'
   },
+
+  timeAndDistanceView: {
+    width: '100%',
+    height: 60,
+    backgroundColor: 'yellow'
+  }
 })
 
 export default styles;

@@ -17,6 +17,10 @@ import { GooglePlacesUseCases } from "../domain/useCases/googlePlaces/GooglePlac
 import { ClientSearchMapViewModel } from "../presentation/screens/client/searchMap/ClientSearchMapViewModel";
 import { GetPlaceDetailsByCoordsUseCase } from "../domain/useCases/googlePlaces/GetPlaceDetailsByCoordsUseCase";
 import { GetDirectionsUseCase } from "../domain/useCases/googlePlaces/GetDirectionsUseCase";
+import { ClientRequestService } from "../data/sources/remote/services/ClientRequestService";
+import { ClientRequestRepositoryImpl } from "../data/repository/ClientRequestRepositoryImpl";
+import { ClientRequestUseCases } from "../domain/useCases/clientRequest/ClientRequestUseCases";
+import { GetTimeAndDistanceUseCase } from "../domain/useCases/clientRequest/GetTimeAndDistanceUseCase";
 
 const container = createContainer();
 
@@ -25,10 +29,12 @@ container.register({
   authService: asClass(AuthService).singleton(),
   googlePlacesService: asClass(GooglePlacesService).singleton(),
   localStorage: asClass(LocalStorage).singleton(),
+  clientRequestService: asClass(ClientRequestService).singleton(),
 
   // REPOSITORIES
   authRepository: asClass(AuthRepositoryImpl).singleton(),
   googlePlacesRepository: asClass(GooglePlacesRepositoryImpl).singleton(),
+  clientRequestRepository: asClass(ClientRequestRepositoryImpl).singleton(),
 
   // USE CASES
   loginUseCase: asClass(LoginUseCase).singleton(),
@@ -41,6 +47,8 @@ container.register({
   getPlaceDetailsByCoordsUseCase: asClass(GetPlaceDetailsByCoordsUseCase).singleton(),
   googlePlacesUseCases: asClass(GooglePlacesUseCases).singleton(),
   getDirectionsUseCase: asClass(GetDirectionsUseCase).singleton(),
+  clientRequestUseCases: asClass(ClientRequestUseCases).singleton(),
+  getTimeAndDistanceUseCase: asClass(GetTimeAndDistanceUseCase).singleton(),
   
   // VIEW MODELS
   loginViewModel: asClass(LoginViewModel).singleton(),

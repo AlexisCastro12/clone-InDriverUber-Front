@@ -28,6 +28,8 @@ import { PlaceGeocodeDetail } from "../../../../domain/models/PlaceGeocodeDetail
 import { ClientSearchMapViewModel } from "./ClientSearchMapViewModel";
 import { GoogleDirections } from "../../../../domain/models/GoogleDirections";
 import { decode } from "@googlemaps/polyline-codec";
+import { TimeAndDistanceValues } from "../../../../domain/models/TimeAndDistanceValues";
+import { ErrorResponse } from "../../../../domain/models/ErrorResponse";
 
 export default function ClientSearchMapScreen() {
   const [location, setLocation] = useState<Region | undefined>(undefined);
@@ -53,6 +55,7 @@ export default function ClientSearchMapScreen() {
   const [shouldDrawRoute, setShouldDrawRoute] = useState<boolean>(false);
   const [isInteractingWithMap, setIsInteractingWithMap] =
     useState<boolean>(false);
+  const [timeAndDistance, setTimeAndDistance] = useState<TimeAndDistanceValues>()
 
   const autocompleteOriginTextRef = useRef<GooglePlacesAutocompleteRef>(null);
   const autocompleteDestinationTextRef =
@@ -61,6 +64,7 @@ export default function ClientSearchMapScreen() {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef<boolean>(false);  // Estas banderas no re renderizan nada
   const isUserMovingMap = useRef<boolean>(true); 
+
   const viewModel: ClientSearchMapViewModel = container.resolve(
     "clientSearchMapViewModel"
   );
@@ -102,6 +106,7 @@ export default function ClientSearchMapScreen() {
       console.log("ORIGIN:\n", originPlace);
       console.log("DESTINATION:\n", destinationPlace);
       handleGetDirections(); // Hasta que se seleccionen los dos lugares correctamente se traza la ruta
+      handleGetTimeAndDistance();
     } else {
       console.log("Error al dibujar la ruta");
     }
@@ -213,6 +218,27 @@ export default function ClientSearchMapScreen() {
       }
     }
   };
+
+  const handleGetTimeAndDistance = async () => {
+    const response: TimeAndDistanceValues | ErrorResponse = await viewModel.getTimeAndDistance(
+      {
+        latitude: originPlace!.lat,
+        longitude: originPlace!.lng,
+      },
+      {
+        latitude: destinationPlace!.lat,
+        longitude: destinationPlace!.lng,
+      }
+    )
+    if('distance' in response) {
+      const result = response as TimeAndDistanceValues;
+      setTimeAndDistance(result);
+    }
+    else {
+      const error = response as ErrorResponse;
+      console.error('Error al generar el precio recomendado para la ruta trazada:\n', error);
+    }
+  }
 
   if (!location) {
     return <View style={styles.container}></View>;
@@ -391,6 +417,10 @@ export default function ClientSearchMapScreen() {
               )
             }
           />
+          <View style= {styles.timeAndDistanceView}>
+            <Text>Precio recomendado: {timeAndDistance?.recommended_value.toFixed(2)/*Redondea 2 decimales*/}</Text>
+            <Text>Tiempo y Distancia: {timeAndDistance?.duration.text}  {timeAndDistance?.distance.text}</Text>
+          </View>
         </View>
       </Animated.View>
 
