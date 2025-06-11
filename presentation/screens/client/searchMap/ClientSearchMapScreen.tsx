@@ -49,7 +49,6 @@ export default function ClientSearchMapScreen() {
   >(undefined);
   const [originText, setOriginText] = useState<string>("");
   const [destinationText, setDestinationText] = useState<string>("");
-  const [isUserMovingMap, setIsUserMovingMap] = useState<boolean>(true);
   const [directionsRoute, setDirectionsRoute] = useState<LatLng[]>([]);
   const [shouldDrawRoute, setShouldDrawRoute] = useState<boolean>(false);
   const [isInteractingWithMap, setIsInteractingWithMap] =
@@ -60,7 +59,8 @@ export default function ClientSearchMapScreen() {
     useRef<GooglePlacesAutocompleteRef>(null);
   const mapRef = useRef<MapView>(null);
   const animatedValue = useRef(new Animated.Value(0)).current;
-
+  const isAnimating = useRef<boolean>(false);  // Estas banderas no re renderizan nada
+  const isUserMovingMap = useRef<boolean>(true); 
   const viewModel: ClientSearchMapViewModel = container.resolve(
     "clientSearchMapViewModel"
   );
@@ -107,17 +107,21 @@ export default function ClientSearchMapScreen() {
     }
   }, [originPlace, destinationPlace, shouldDrawRoute]);
 
-  const toggleView = (isInteractingWithMap: boolean) => {
-    setIsInteractingWithMap(isInteractingWithMap);
+  const toggleView = (toggleValue: boolean) => {
+    if (toggleValue === isInteractingWithMap || isAnimating.current) return;  // No hacer nada si el estado ya es igual o si está animando
+    setIsInteractingWithMap(toggleValue);
+    isAnimating.current = true; // Inicia la animacion
     Animated.timing(animatedValue, {
-      toValue: isInteractingWithMap ? 1 : 0,
+      toValue: toggleValue ? 1 : 0,
       duration: 200,
       useNativeDriver: true, //Animacion fluida (nativa)
-    }).start();
+    }).start(() => {
+    isAnimating.current = false; // Termina la animación
+  });
   };
 
   const moveMapToLocation = (lat: number, lng: number) => {
-    setIsUserMovingMap(false);
+    isUserMovingMap.current = false;
     // A partir de aqui, cualquier cambio en el mapa sera mediante programacion
     const camera: Camera = {
       center: {
@@ -130,7 +134,7 @@ export default function ClientSearchMapScreen() {
     };
     mapRef.current?.animateCamera(camera, { duration: 1000 });
     setTimeout(() => {
-      setIsUserMovingMap(true);
+      isUserMovingMap.current = true;
     }, 1200); // Despues de los cambios por programacion en el mapa, todos los cambios solo seran por el usuario
   };
 
@@ -231,12 +235,12 @@ export default function ClientSearchMapScreen() {
           initialRegion={location}
           onRegionChangeComplete={(region) => {
             //Si el usuario no esta moviendo el mapa (el mapa se mueve por autocomplete) entonces no geodecodifica
-            if (!isUserMovingMap) return;
+            if (!isUserMovingMap.current) return;
             toggleView(false);
             handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
           }}
-          onPanDrag={() => toggleView(true)}
           onTouchStart={() => toggleView(true)}
+          onTouchEnd={() => toggleView(false)}
         >
           {originPlace && (
             <Marker
