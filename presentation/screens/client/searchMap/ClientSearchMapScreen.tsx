@@ -327,7 +327,7 @@ export default function ClientSearchMapScreen() {
           padding: 10,
         }}
       >
-        <View style={{ width: "100%", height: "100%" }}>
+        <View style={ styles.detailsTravelContainer }>
           <GooglePlacesAutocomplete
             ref={autocompleteOriginTextRef}
             minLength={4}
