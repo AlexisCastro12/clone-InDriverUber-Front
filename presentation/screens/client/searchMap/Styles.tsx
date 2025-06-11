@@ -7,9 +7,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  map: {
-    width:'100%',
-    height: '100%',
+  AnimatedViewMap: {
+    width: "100%",
+    position: "absolute",
+    top: 0,
   },
 
   placeOriginAutocomplete: {
@@ -48,13 +49,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#888'
   },
-
-  pinImageMap: {
-    position: 'absolute',
-    height: 50,
-    width: 50,
-
-  }
 })
 
 export default styles;

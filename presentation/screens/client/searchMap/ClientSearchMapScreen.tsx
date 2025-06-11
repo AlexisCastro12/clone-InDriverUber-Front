@@ -1,9 +1,10 @@
 import {
+  Animated,
+  Dimensions,
   Image,
   Platform,
   Pressable,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import styles from "./Styles";
@@ -51,11 +52,14 @@ export default function ClientSearchMapScreen() {
   const [isUserMovingMap, setIsUserMovingMap] = useState<boolean>(true);
   const [directionsRoute, setDirectionsRoute] = useState<LatLng[]>([]);
   const [shouldDrawRoute, setShouldDrawRoute] = useState<boolean>(false);
+  const [isInteractingWithMap, setIsInteractingWithMap] =
+    useState<boolean>(false);
 
   const autocompleteOriginTextRef = useRef<GooglePlacesAutocompleteRef>(null);
   const autocompleteDestinationTextRef =
     useRef<GooglePlacesAutocompleteRef>(null);
   const mapRef = useRef<MapView>(null);
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   const viewModel: ClientSearchMapViewModel = container.resolve(
     "clientSearchMapViewModel"
@@ -89,7 +93,11 @@ export default function ClientSearchMapScreen() {
   }, []);
 
   useEffect(() => {
-    if (originPlace !== undefined && destinationPlace !== undefined && shouldDrawRoute) {
+    if (
+      originPlace !== undefined &&
+      destinationPlace !== undefined &&
+      shouldDrawRoute
+    ) {
       console.log("Ya se seleccionaron los datos de ubicacion");
       console.log("ORIGIN:\n", originPlace);
       console.log("DESTINATION:\n", destinationPlace);
@@ -99,9 +107,14 @@ export default function ClientSearchMapScreen() {
     }
   }, [originPlace, destinationPlace, shouldDrawRoute]);
 
-  if (!location) {
-    return <View style={styles.container}></View>;
-  }
+  const toggleView = (isInteractingWithMap: boolean) => {
+    setIsInteractingWithMap(isInteractingWithMap);
+    Animated.timing(animatedValue, {
+      toValue: isInteractingWithMap ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true, //Animacion fluida (nativa)
+    }).start();
+  };
 
   const moveMapToLocation = (lat: number, lng: number) => {
     setIsUserMovingMap(false);
@@ -159,15 +172,14 @@ export default function ClientSearchMapScreen() {
       console.log("DIRECCION Origen: ", address);
       // Solo se geodecodifica con el punto de partida (trabaja con el marcador en el mapa)
       autocompleteOriginTextRef.current?.setAddressText(address);
-      if(originPlace === undefined) {
+      if (originPlace === undefined) {
         setShouldDrawRoute(true); // Cada que no este definido un punto de partida
         setOriginPlace({
           lat: lat,
           lng: lng,
           address: address,
         }); // El marcador de partida solo se deja fijo siempre que no exista anteriormente
-      }
-      else {
+      } else {
         setShouldDrawRoute(false);
       }
       setOriginText(address);
@@ -197,156 +209,194 @@ export default function ClientSearchMapScreen() {
       }
     }
   };
+
+  if (!location) {
+    return <View style={styles.container}></View>;
+  }
+
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        zoomControlEnabled = {true}
-        initialRegion={location}
-        onRegionChangeComplete={(region) => {
-          //Si el usuario no esta moviendo el mapa (el mapa se mueve por autocomplete) entonces no geodecodifica
-          if (!isUserMovingMap) return;
-          handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
+      <Animated.View
+        style={styles.AnimatedViewMap}
+      >
+        <MapView
+          ref={mapRef}
+          style={{
+            width: "100%",
+            height: isInteractingWithMap
+              ? Dimensions.get("window").height * 0.87
+              : Dimensions.get("window").height * 0.66,
+          }}
+          zoomControlEnabled={true}
+          initialRegion={location}
+          onRegionChangeComplete={(region) => {
+            //Si el usuario no esta moviendo el mapa (el mapa se mueve por autocomplete) entonces no geodecodifica
+            if (!isUserMovingMap) return;
+            toggleView(false);
+            handleGetPlaceDetailsByCoords(region.latitude, region.longitude);
+          }}
+          onPanDrag={() => toggleView(true)}
+          onTouchStart={() => toggleView(true)}
+        >
+          {originPlace && (
+            <Marker
+              coordinate={{
+                latitude: originPlace!.lat,
+                longitude: originPlace!.lng,
+              }}
+              title="Punto de Partida"
+            >
+              <View style={{ width: 50, height: 50 }}>
+                <Image
+                  source={require("../../../../assets/pin_map.png")}
+                  style={{ width: 35, height: 35, resizeMode: "contain" }}
+                />
+              </View>
+            </Marker>
+          )}
+          {destinationPlace && (
+            <Marker
+              coordinate={{
+                latitude: destinationPlace!.lat,
+                longitude: destinationPlace!.lng,
+              }}
+              title="Punto de Partida"
+            >
+              <View style={{ width: 50, height: 50 }}>
+                <Image
+                  source={require("../../../../assets/flag.png")}
+                  style={{ width: 35, height: 35, resizeMode: "contain" }}
+                />
+              </View>
+            </Marker>
+          )}
+          {directionsRoute.length > 0 && (
+            <Polyline
+              coordinates={directionsRoute}
+              strokeWidth={6}
+              strokeColor="red"
+            />
+          )}
+        </MapView>
+      </Animated.View>
+      <Animated.View
+        style= {{
+          transform: [
+            {
+              translateY: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 200],
+              }),
+            },
+          ],
+          width: "100%",
+          position: "absolute",
+          height: '30%',
+          bottom: 0,
+          backgroundColor: 'gray',
+          padding: 10,
         }}
       >
-        {
-          originPlace && (
-            <Marker
-            coordinate={{
-            latitude: originPlace!.lat,
-            longitude: originPlace!.lng,
-          }}
-          title="Punto de Partida"
-        >
-          <View style={{width:50, height:50}}>
-            <Image
-              source={require('../../../../assets/pin_map.png')}
-              style={{width:35, height:35, resizeMode: 'contain'}}
-            />
-          </View>
-        </Marker>
-          )
-        }
-        {
-          destinationPlace && (
-            <Marker
-            coordinate={{
-            latitude: destinationPlace!.lat,
-            longitude: destinationPlace!.lng,
-          }}
-          title="Punto de Partida"
-        >
-          <View style={{width:50, height:50}}>
-            <Image
-              source={require('../../../../assets/flag.png')}
-              style={{width:35, height:35, resizeMode: 'contain'}}
-            />
-          </View>
-        </Marker>
-          )
-        }
-        {
-        directionsRoute.length > 0 && (
-          <Polyline
-            coordinates={directionsRoute}
-            strokeWidth={6}
-            strokeColor="red"
+        <View style={{ width: "100%", height: "100%" }}>
+          <GooglePlacesAutocomplete
+            ref={autocompleteOriginTextRef}
+            minLength={4}
+            styles={{
+              container: {width:'100%'},
+              textInput: styles.textInputAutocomplete,
+            }}
+            placeholder="Intoduce punto de partida"
+            onPress={(data) => {
+              setOriginText(data.description);
+              handleGetPlaceDetails(data.place_id, true); // is Origin: True para el primer autocomplete
+            }}
+            textInputProps={{
+              onChangeText: (text) => setOriginText(text),
+              value: originText,
+            }}
+            query={{
+              key: Constants.expoConfig!.extra!.googleApiKey,
+              language: "es", //Español
+              components: "country:mx", //limita la busqueda al pais mx para no predecir otros lugares y reducir costos
+              location: `${location!.latitude},${location!.longitude}`,
+              radius: 15000,
+            }}
+            debounce={500}
+            fetchDetails={false}
+            renderRightButton={() =>
+              originText.length > 0 ? (
+                <Pressable
+                  onPress={async () => {
+                    console.log("clear Origin");
+                    await autocompleteOriginTextRef.current?.setAddressText("");
+                    setOriginText("");
+                    setOriginPlace(undefined);
+                  }}
+                  style={styles.clearAutocompleteButton}
+                >
+                  <Text style={styles.clearAutocompleteText}>×</Text>
+                </Pressable>
+              ) : (
+                <></>
+              )
+            }
           />
-        )}
-      </MapView>
-      <GooglePlacesAutocomplete
-        ref={autocompleteOriginTextRef}
-        minLength={4}
-        styles={{
-          container: styles.placeOriginAutocomplete,
-          textInput: styles.textInputAutocomplete,
-        }}
-        placeholder="Intoduce punto de partida"
-        onPress={(data) => {
-          setOriginText(data.description);
-          handleGetPlaceDetails(data.place_id, true); // is Origin: True para el primer autocomplete
-        }}
-        textInputProps={{
-          onChangeText: (text) => setOriginText(text),
-          value: originText,
-        }}
-        query={{
-          key: Constants.expoConfig!.extra!.googleApiKey,
-          language: "es", //Español
-          components: "country:mx", //limita la busqueda al pais mx para no predecir otros lugares y reducir costos
-          location: `${location!.latitude},${location!.longitude}`,
-          radius: 15000,
-        }}
-        debounce={500}
-        fetchDetails={false}
-        renderRightButton={() =>
-          originText.length > 0 ? (
-            <Pressable
-              onPress={async () => {
-                console.log("clear Origin");
-                await autocompleteOriginTextRef.current?.setAddressText("");
-                setOriginText("");
-                setOriginPlace(undefined);
-              }}
-              style={styles.clearAutocompleteButton}
-            >
-              <Text style={styles.clearAutocompleteText}>×</Text>
-            </Pressable>
-          ) : (
-            <></>
-          )
-        }
-      />
 
-      <GooglePlacesAutocomplete
-        ref={autocompleteDestinationTextRef}
-        minLength={4}
-        styles={{
-          container: styles.placeDestinationAutocomplete,
-          textInput: styles.textInputAutocomplete,
-        }}
-        placeholder="Intoduce punto de destino"
-        onPress={(data) => {
-          setDestinationText(data.description);
-          handleGetPlaceDetails(data.place_id, false); // isOrigin: false para el segundo autocomplete
-        }}
-        textInputProps={{
-          onChangeText: (text) => setDestinationText(text),
-          value: destinationText,
-        }}
-        query={{
-          key: Constants.expoConfig!.extra!.googleApiKey,
-          language: "es", //Español
-          components: "country:mx", //limita la busqueda al pais mx para no predecir otros lugares y reducir costos
-          location: `${location!.latitude},${location!.longitude}`,
-          radius: 15000,
-        }}
-        debounce={500}
-        fetchDetails={false}
-        renderRightButton={() =>
-          destinationText.length > 0 ? (
-            <Pressable
-              onPress={async () => {
-                console.log("clear Destination");
-                await autocompleteDestinationTextRef.current?.setAddressText(
-                  ""
-                );
-                setDestinationText("");
-                setDestinationPlace(undefined);
-              }}
-              style={styles.clearAutocompleteButton}
-            >
-              <Text style={styles.clearAutocompleteText}>×</Text>
-            </Pressable>
-          ) : (
-            <></>
-          )
-        }
-      />
+          <GooglePlacesAutocomplete
+            ref={autocompleteDestinationTextRef}
+            minLength={4}
+            styles={{
+              container: {width:'100%'},
+              textInput: styles.textInputAutocomplete,
+            }}
+            placeholder="Intoduce punto de destino"
+            onPress={(data) => {
+              setDestinationText(data.description);
+              handleGetPlaceDetails(data.place_id, false); // isOrigin: false para el segundo autocomplete
+            }}
+            textInputProps={{
+              onChangeText: (text) => setDestinationText(text),
+              value: destinationText,
+            }}
+            query={{
+              key: Constants.expoConfig!.extra!.googleApiKey,
+              language: "es", //Español
+              components: "country:mx", //limita la busqueda al pais mx para no predecir otros lugares y reducir costos
+              location: `${location!.latitude},${location!.longitude}`,
+              radius: 15000,
+            }}
+            debounce={500}
+            fetchDetails={false}
+            renderRightButton={() =>
+              destinationText.length > 0 ? (
+                <Pressable
+                  onPress={async () => {
+                    console.log("clear Destination");
+                    await autocompleteDestinationTextRef.current?.setAddressText(
+                      ""
+                    );
+                    setDestinationText("");
+                    setDestinationPlace(undefined);
+                  }}
+                  style={styles.clearAutocompleteButton}
+                >
+                  <Text style={styles.clearAutocompleteText}>×</Text>
+                </Pressable>
+              ) : (
+                <></>
+              )
+            }
+          />
+        </View>
+      </Animated.View>
 
       <Image
-        style={styles.pinImageMap}
+        style={{
+          position: 'absolute',
+          height: 50,
+          width: 50,
+          top: isInteractingWithMap ? '42%' : '30%'
+        }}
         source={require("../../../../assets/pin_red.png")}
       />
     </View>
