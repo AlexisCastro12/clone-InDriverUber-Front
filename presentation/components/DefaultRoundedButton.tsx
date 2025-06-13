@@ -11,7 +11,10 @@ interface Props {
 
 const DefaultRoundedButton = ({ text, onPress, backgroundColor }: Props) => {
   return (
-    <Pressable style={[styles.roundedButton, {backgroundColor: backgroundColor || 'red'}]}
+    <Pressable style={({pressed}) => [
+      styles.roundedButton,
+      pressed && styles.touchableOpacity, 
+      {backgroundColor: backgroundColor || 'red'}]}
       onPress={onPress}>
       <Text style={styles.textButton}>{text}</Text>
     </Pressable>
@@ -27,6 +30,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 30,
     marginTop: 25,
+  },
+  touchableOpacity: {
+    opacity: 0.5,
   },
   textButton: {
     color: 'white',
