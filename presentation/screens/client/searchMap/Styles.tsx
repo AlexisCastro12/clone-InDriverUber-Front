@@ -59,7 +59,25 @@ const styles = StyleSheet.create({
   detailsTravelContainer: {
   width: "100%",
   height: "100%",
-  }
+  },
+
+  modalsTouchableOpacity: {
+    opacity: 0.4,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end'
+  },
+
+  modalContent: {
+    height: '90%',
+    backgroundColor:'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+  },
 })
 
 export default styles;
