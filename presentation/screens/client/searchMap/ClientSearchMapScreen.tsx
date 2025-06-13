@@ -64,8 +64,7 @@ export default function ClientSearchMapScreen() {
     useState<boolean>(false);
 
   const autocompleteOriginRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const autocompleteDestinationRef =
-    useRef<GooglePlacesAutocompleteRef>(null);
+  const autocompleteDestinationRef = useRef<GooglePlacesAutocompleteRef>(null);
   const mapRef = useRef<MapView>(null);
   const animatedValue = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef<boolean>(false); // Estas banderas no re renderizan nada
@@ -319,39 +318,46 @@ export default function ClientSearchMapScreen() {
         </MapView>
       </Animated.View>
       <Animated.View
-        style={{
-          transform: [
-            {
-              translateY: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 200],
-              }),
-            },
-          ],
-          width: "100%",
-          position: "absolute",
-          height: "30%",
-          bottom: 0,
-          backgroundColor: "gray",
-          padding: 10,
-        }}
+        style={[
+          // Dos tipos de estilos en un array
+          // Estilos Fijos
+          styles.animatedViewDetailsTravel,
+          // Estilos Dinamicos (dentro de {})
+          {
+            transform: [
+              {
+                translateY: animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 200],
+                }),
+              },
+            ],
+          },
+        ]}
       >
         <View style={styles.detailsTravelContainer}>
           <Pressable
             onPress={() => {
               setIsOriginModalVisible(true);
             }}
-            style={({ pressed }) => [pressed && styles.modalsTouchableOpacity]}
+            style={({ pressed }) => [
+              // Estilos fijos y dinamicos
+              styles.infoAutocompleteContainer,
+              pressed && styles.modalsTouchableOpacity,
+            ]}
           >
-            {originPlace?.address.trim() ? (<Text>{originPlace?.address}</Text>) : (<Text>Selecciona un Punto de Partida</Text>)}
+            <Text>{originPlace?.address.trim() || "Recoger en"}</Text>
           </Pressable>
           <Pressable
             onPress={() => {
               setIsDestinationModalVisible(true);
             }}
-            style={({ pressed }) => [pressed && styles.modalsTouchableOpacity]}
+            style={({ pressed }) => [
+              styles.infoAutocompleteContainer,
+              pressed && styles.modalsTouchableOpacity,
+            ]}
           >
-            {destinationPlace?.address.trim() ? (<Text>{destinationPlace?.address}</Text>) : (<Text>Selecciona un Punto de Llegada</Text>)}
+            <Text>{destinationPlace?.address.trim() || "Destino"}</Text>
           </Pressable>
 
           <Modal
@@ -362,7 +368,7 @@ export default function ClientSearchMapScreen() {
             }}
             transparent={true}
             onShow={() => {
-              autocompleteOriginRef.current?.setAddressText('');
+              autocompleteOriginRef.current?.setAddressText("");
               setTimeout(() => {
                 autocompleteOriginRef.current?.focus();
               }, 200);
@@ -373,6 +379,11 @@ export default function ClientSearchMapScreen() {
               onPress={() => setIsOriginModalVisible(false)}
             >
               <View style={styles.modalContent}>
+                <View style={styles.viewDecorationModal}>
+                  <Text style={styles.textDecorationModal}>
+                    Selecciona el lugar de recogida
+                  </Text>
+                </View>
                 <GooglePlacesAutocomplete
                   ref={autocompleteOriginRef}
                   minLength={4}
@@ -403,9 +414,7 @@ export default function ClientSearchMapScreen() {
                       <Pressable
                         onPress={() => {
                           console.log("clear Origin");
-                          autocompleteOriginRef.current?.setAddressText(
-                            ""
-                          );
+                          autocompleteOriginRef.current?.setAddressText("");
                           setOriginText("");
                           setOriginPlace(undefined);
                         }}
@@ -430,7 +439,7 @@ export default function ClientSearchMapScreen() {
             }}
             transparent={true}
             onShow={() => {
-              autocompleteDestinationRef.current?.setAddressText('');
+              autocompleteDestinationRef.current?.setAddressText("");
               setTimeout(() => {
                 autocompleteDestinationRef.current?.focus();
               }, 200);
@@ -441,6 +450,11 @@ export default function ClientSearchMapScreen() {
               onPress={() => setIsDestinationModalVisible(false)}
             >
               <View style={styles.modalContent}>
+                <View style={styles.viewDecorationModal}>
+                  <Text style={styles.textDecorationModal}>
+                    Selecciona el lugar de destino
+                  </Text>
+                </View>
                 <GooglePlacesAutocomplete
                   ref={autocompleteDestinationRef}
                   minLength={4}
@@ -490,15 +504,15 @@ export default function ClientSearchMapScreen() {
             </Pressable>
           </Modal>
           <View style={styles.timeAndDistanceView}>
-            <Text>
-              Precio recomendado:{" "}
+            <Text style={styles.timeAndDistanceText}>
+              Precio recomendado: $
               {
                 timeAndDistance?.recommended_value.toFixed(
                   2
                 ) /*Redondea 2 decimales*/
               }
             </Text>
-            <Text>
+            <Text style={styles.timeAndDistanceText}>
               Tiempo y Distancia: {timeAndDistance?.duration.text}{" "}
               {timeAndDistance?.distance.text}
             </Text>
