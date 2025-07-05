@@ -8,7 +8,8 @@ interface Props{
   keyboardType?: KeyboardType,
   icon: any,      //Se recibe cualquier tipo de dato
   secureTextEntry?: boolean,    //para contraseñas
-  placeholderTextColor?: string
+  placeholderTextColor?: string,
+  textColor?: string,
 }
 
 /*No podemos usar "require(icon)" causa error por eso se usa icon:any*/
@@ -21,8 +22,8 @@ const DefaultTextInput = ({
   placeholderTextColor, 
   keyboardType, 
   icon,
-  secureTextEntry = false     //Opcion A para poner Valores por defecto en caso de que no se seteen al reutilizar el contro
-
+  secureTextEntry = false,     //Opcion A para poner Valores por defecto en caso de que no se seteen al reutilizar el control
+  textColor = 'white',
 }:Props) => {
   return (
     <View style={styles.containerTextInput}>
@@ -30,7 +31,9 @@ const DefaultTextInput = ({
             style={styles.textInputIcon}
             source={ icon } />
           <TextInput
-            style={styles.textInput}
+            style={
+              {color: textColor,
+              ...styles.textInput}}
             placeholder={placeholder}
             value = {value}
             placeholderTextColor= {placeholderTextColor || 'white'}
@@ -54,7 +57,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderBottomWidth: 1,
     borderBottomColor: 'white',
-    color: 'white',
     fontSize: 18
   },
   textInputIcon: {
