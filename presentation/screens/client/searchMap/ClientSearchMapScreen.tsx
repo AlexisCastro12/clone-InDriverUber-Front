@@ -378,7 +378,8 @@ export default function ClientSearchMapScreen() {
               style={styles.modalOverlay}
               onPress={() => setIsOriginModalVisible(false)}
             >
-              <View style={styles.modalContent}>
+              {/* //Se envuelve en un pressable para que al presionar cualquier parte del modal no se cierre */}
+              <Pressable style={styles.modalContent} onPress={() => {}}>
                 <View style={styles.viewDecorationModal}>
                   <Text style={styles.textDecorationModal}>
                     Selecciona el lugar de recogida
@@ -427,7 +428,7 @@ export default function ClientSearchMapScreen() {
                     )
                   }
                 />
-              </View>
+              </Pressable>
             </Pressable>
           </Modal>
 
@@ -449,7 +450,7 @@ export default function ClientSearchMapScreen() {
               style={styles.modalOverlay}
               onPress={() => setIsDestinationModalVisible(false)}
             >
-              <View style={styles.modalContent}>
+              <Pressable style={styles.modalContent} onPress={() => {}}>
                 <View style={styles.viewDecorationModal}>
                   <Text style={styles.textDecorationModal}>
                     Selecciona el lugar de destino
@@ -500,7 +501,7 @@ export default function ClientSearchMapScreen() {
                     )
                   }
                 />
-              </View>
+              </Pressable>
             </Pressable>
           </Modal>
           <View style={styles.timeAndDistanceView}>
